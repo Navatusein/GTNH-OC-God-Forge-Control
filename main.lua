@@ -14,7 +14,6 @@ local repository = "Navatusein/GTNH-OC-God-Forge-Control"
 local archiveName = "GodForgeControl"
 
 local program = programLib:new(config.logger, config.enableAutoUpdate, version, repository, archiveName)
--- local program = programLib:new(config.logger)
 local gui = guiLib:new(program)
 
 local logo = {
