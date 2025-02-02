@@ -1,5 +1,6 @@
 local component = require("component")
 local event = require("event")
+local computer = require("computer")
 
 local stateMachineLib = require("lib.state-machine-lib")
 local componentDiscoverLib = require("lib.component-discover-lib")
@@ -193,8 +194,9 @@ function heliofusionExoticizerController:new(
 
     self.stateMachine.data.outputs = nil
     self.stateMachine.data.craftFailCount = 0
-    self.stateMachine.data.time = os.time()
+    self.stateMachine.data.time = computer.uptime()
     self.stateMachine.data.notifyLongIdle = false
+    self.stateMachine.data.notifyLongEndTime = false
 
     self:fillDatabase(self.magmatterMode and "Magmatter" or "Gluon")
     self:clearPattern()
@@ -205,7 +207,8 @@ function heliofusionExoticizerController:new(
 
     self.stateMachine.states.idle = self.stateMachine:createState("Idle")
     self.stateMachine.states.idle.init = function()
-      self.stateMachine.data.time = os.time()
+      self.stateMachine.data.time = computer.uptime()
+      self.stateMachine.data.notifyLongIdle = false
 
       if self.stateMachine.data.notifyLongEndTime == true then
         event.push("log_warning", "Successfully went to Idle state after a long Wait End state")
@@ -216,21 +219,24 @@ function heliofusionExoticizerController:new(
 
       if signal ~= 0 then
         local items, itemsCount = self:getOutputs()
-        local diff = math.ceil(os.difftime(os.time(), self.stateMachine.data.time) / 60)
+        local diff = math.ceil(computer.uptime() - self.stateMachine.data.time)
 
         if itemsCount >= (self.magmatterMode == true and 3 or 7) then
           self.stateMachine.data.outputs = items
-          self.stateMachine.data.notifyLongIdle = false
           self.stateMachine:setState(self.stateMachine.states.encodeFakePattern)
-        elseif diff > 120 and diff < 140 and self.stateMachine.data.notifyLongIdle == false then
+        elseif diff > 240 and self.stateMachine.data.notifyLongIdle == false then
           self.stateMachine.data.notifyLongIdle = true
-          event.push("log_warning", "More than two minutes in the idle state: "..diff)
+          event.push("log_warning", "More than four minutes in the idle state: "..diff)
         end
       end
     end
 
     self.stateMachine.states.encodeFakePattern = self.stateMachine:createState("Encode Fake Pattern")
     self.stateMachine.states.encodeFakePattern.init = function()
+      if self.stateMachine.data.notifyLongIdle == true then
+        event.push("log_warning", "Successfully went to Encode Fake Pattern state after a long Idle state")
+      end
+
       self:encodePattern(self.stateMachine.data.outputs)
       self.stateMachine:setState(self.stateMachine.states.clearOutputAe)
     end
@@ -257,13 +263,13 @@ function heliofusionExoticizerController:new(
 
     self.stateMachine.states.waitEnd = self.stateMachine:createState("Wait End")
     self.stateMachine.states.waitEnd.init = function()
-      self.stateMachine.data.waitEndTime = os.time()
+      self.stateMachine.data.waitEndTime = computer.uptime()
       self.stateMachine.data.notifyLongEndTime = false
     end
     self.stateMachine.states.waitEnd.update = function()
       local _, itemsCount = self:getOutputs()
 
-      local diff = math.ceil(os.difftime(os.time(), self.stateMachine.data.waitEndTime) / 60)
+      local diff = math.ceil(computer.uptime() - self.stateMachine.data.waitEndTime)
 
       if itemsCount ~= 0 then 
         while self:tryCancelFakeRecipe() == false do
@@ -272,9 +278,9 @@ function heliofusionExoticizerController:new(
 
         self.stateMachine.data.outputs = nil
         self.stateMachine:setState(self.stateMachine.states.idle)
-      elseif diff > 120 and diff < 140 and self.stateMachine.data.notifyLongEndTime == false then
+      elseif diff > 240 and self.stateMachine.data.notifyLongEndTime == false then
         self.stateMachine.data.notifyLongEndTime = true
-        event.push("log_warning", "More than two minutes in the wait end state: "..diff)
+        event.push("log_warning", "More than four minutes in the wait end state: "..diff)
       end
     end
 
