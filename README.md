@@ -93,12 +93,12 @@ For the program to work, you need to make a simple setup. On the Heliofusion Exo
 it is necessary to connect the subnetwork that will receive dusts and liquids further it will 
 be called the output subnetwork (On the pictures it is purple). It consists of “ME Dual Interface”, 
 “Output Hatch (ME)”, “Output Bus (ME)”, “ME Fluid Storage Bus” and “ME Drive” where there are two 
-disks for liquids of 5 types and one disk for dust. The “ME Fluid Storage Bus” is configured to send 
-“Degenerate Quark Gluon Plasma” and “Molten Magmatter” to the input subnet (more about it later). 
-We also have another subnet (In this guide we will consider a setup where the input subnet is our 
-main subnet, but it is possible to separate them) it consists of “ME IO Port”, “ME Dual Interface” 
-and “ME Fluid Level Emitter”. From now on in the guide I will refer to it as the input subnet 
-(It is green in the pictures).
+disks for liquids of 5 types and one disk for dust. The “ME Fluid Storage Bus” is configured in input 
+only mode to send “Degenerate Quark Gluon Plasma” and “Molten Magmatter” to the input subnet 
+(more about it later). We also have another subnet (In this guide we will consider a setup where 
+the input subnet is our main subnet, but it is possible to separate them) it consists of “ME IO Port”, 
+“ME Dual Interface” and “ME Fluid Level Emitter”. From now on in the guide I will refer to it as the 
+input subnet (It is green in the pictures).
 
 In the schematic we have 2 adapters connected to volume subnets, we also have a transposer 
 to flip items from the output subnet to the input subnet. Also in one of the adapters we have 

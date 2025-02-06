@@ -237,7 +237,22 @@ function heliofusionExoticizerController:new(
         event.push("log_warning", "Successfully went to Encode Fake Pattern state after a long Idle state")
       end
 
-      self:encodePattern(self.stateMachine.data.outputs)
+      local success, outputsCount = self:encodePattern(self.stateMachine.data.outputs)
+
+      if success == false then
+        self.stateMachine.data.errorMessage = "Found an unidentified object in the output subnet"
+        self.stateMachine:setState(self.stateMachine.states.error)
+        return
+      end
+
+      local expectedCount = self.magmatterMode == true and 3 or 7
+
+      if outputsCount ~= expectedCount then
+        self.stateMachine.data.errorMessage = "Number of objects ("..outputsCount..") doesn't match the expected ("..expectedCount..")"
+        self.stateMachine:setState(self.stateMachine.states.error)
+        return
+      end
+
       self.stateMachine:setState(self.stateMachine.states.clearOutputAe)
     end
 
@@ -354,6 +369,8 @@ function heliofusionExoticizerController:new(
 
   ---Encode fake pattern with the right plasmas
   ---@param outputs table<string, OutputItem>
+  ---@return boolean
+  ---@return integer
   ---@private
   function obj:encodePattern(outputs)
     local index = 1
@@ -370,10 +387,16 @@ function heliofusionExoticizerController:new(
         count = value.count * (value.isLiquid == true and 1000 or 144)
       end
 
-      self.inputMeInterfaceProxy.setInterfacePatternInput(1, self.database.address, self.plasmaList[value.label].databaseIndex, count, index)
+      if self.plasmaList[value.label] ~= nil then
+        self.inputMeInterfaceProxy.setInterfacePatternInput(1, self.database.address, self.plasmaList[value.label].databaseIndex, count, index)
+      else
+        return false, index - 1
+      end
 
       index = index + 1
-      end
+    end
+
+    return true, index - 1
   end
 
   ---Get items from output ae
@@ -390,13 +413,25 @@ function heliofusionExoticizerController:new(
 
     for _, value in pairs(items) do
       local label = value.label:match("Pile of%s(.+)%sDust")
-      outputs[label] = {label = label, count = value.size, isLiquid = false}
+
+      if label == nil then
+        outputs[value.label] = {label = value.label, count = value.size, isLiquid = false}
+      else
+        outputs[label] = {label = label, count = value.size, isLiquid = false}
+      end
+
       count = count + 1
     end
 
     for _, value in pairs(liquids) do
       local label = value.label:match("^(.-)%s?[Gg]?[Aa]?[Ss]?$")
-      outputs[label] = {label = label, count = value.amount, isLiquid = true}
+
+      if label == nil then
+        outputs[value.label] = {label = value.label, count = value.amount, isLiquid = true}
+      else
+        outputs[label] = {label = label, count = value.amount, isLiquid = true}
+      end
+
       count = count + 1
     end
 
