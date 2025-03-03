@@ -412,7 +412,7 @@ function heliofusionExoticizerController:new(
     local count = 0
 
     for _, value in pairs(items) do
-      local label = value.label:match("Pile of%s(.+)%sDust")
+      local label = value.label:match("Pile of%s(.+)%sDust") or value.label:match("(%w+) Dust")
 
       if label == nil then
         outputs[value.label] = {label = value.label, count = value.size, isLiquid = false}
