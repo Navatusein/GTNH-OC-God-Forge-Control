@@ -119,6 +119,7 @@ local plasmaList = {
     ["Neutronium"] = "plasma.neutronium",
     ["Rhugnor"] = "plasma.rhugnor",
     ["Six-Phased Copper"] = "plasma.sixphasedcopper",
+    ["Tritanium"] = "plasma.tritanium",
     ["Spatially Enlarged Fluid"] = "spatialfluid",
     ["Tachyon Rich Temporal Fluid"] = "temporalfluid"
   }
@@ -423,7 +424,7 @@ function heliofusionExoticizerController:new(
       if label == nil then
         outputs[value.label] = {label = value.label, count = value.size * coefficient, isLiquid = false}
       else
-        outputs[label] = {label = label, count = value.size, isLiquid = false}
+        outputs[label] = {label = label, count = value.size * coefficient, isLiquid = false}
       end
 
       count = count + 1
