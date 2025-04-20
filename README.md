@@ -72,8 +72,7 @@ main
 ## Setup
 
 > [!NOTE]  
-> For easy copying of addresses, use "Analyzer" from the OpenComputers mod. Right-click on the component, its address will be written in the chat. 
-> If you click on it, it will be copied.
+> For easy copying of addresses, use "Analyzer" from the OpenComputers mod. Ctrl + Right-Click on the component, its address will be copied to your clipboard. 
 >
 > <img src="docs/analyzer.png" alt="Analyzer" width="120"/>
 
