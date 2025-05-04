@@ -185,9 +185,9 @@ logger = loggerLib:newFormConfig({
 In the `magmatterMode` field you specify program mode. If it `true` program will in be in the magmatter craft mode. 
 If it `false` program will in be in the gluon plasma craft mode. 
 
-In the `outputMeInterfaceAddress` field you specify address of the me interface witch connected to input subnet.
+In the `outputMeInterfaceAddress` field you specify address of the me interface witch connected to output subnet.
 
-In the `inputMeInterfaceAddress` field you specify address of the me interface witch connected to output subnet.
+In the `inputMeInterfaceAddress` field you specify address of the me interface witch connected to input subnet.
 
 In the `transposerAddress` field you specify address of the transposer witch connected to ME Drive and ME IO Port.
 
