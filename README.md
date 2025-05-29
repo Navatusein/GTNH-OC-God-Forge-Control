@@ -128,7 +128,8 @@ It must have a number of CPUs greater than the number of setups connected to it.
 also important that it has a “Fluid Discretizer” and all CPUs have a “Crafting Monitor”.
 
 > [!CAUTION]
-> In cases where the input subnet is your main network, the entire CPU must be equipped with a “Crafting Monitor”.
+> To work, all CPUs must be equipped with a “Crafting Monitor“
+> In cases where the input subnet is your main network, all CPUs must be equipped with a “Crafting Monitor“.
 
 If, on the other hand, you want to separate the entry network from the main network. 
 Then you need to show all 80+ plasmas in the input subnet and make the output of unnecessary 
