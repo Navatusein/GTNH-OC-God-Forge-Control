@@ -264,6 +264,9 @@ function heliofusionExoticizerController:new(
     end
 
     self.stateMachine.states.requestFakePattern = self.stateMachine:createState("Request Fake Pattern")
+    self.stateMachine.states.requestFakePattern.init = function()
+      self.stateMachine.data.craftFailCount = 0
+    end
     self.stateMachine.states.requestFakePattern.update = function()
       if self:getFreeCpusCount() >= 1 then
         if self:requestFakeRecipe() == true or self:hasFakeRecipe() == true then
