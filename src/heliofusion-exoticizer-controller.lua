@@ -283,6 +283,8 @@ function heliofusionExoticizerController:new(
             os.sleep(1)
           end
         end
+      else
+        os.sleep(2)
       end
     end
 
