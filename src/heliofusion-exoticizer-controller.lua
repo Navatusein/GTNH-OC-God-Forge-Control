@@ -270,9 +270,15 @@ function heliofusionExoticizerController:new(
           self.stateMachine.data.craftFailCount = 0
           self.stateMachine:setState(self.stateMachine.states.waitEnd)
         else
-          self.stateMachine.data.errorMessage = "Cant request craft: "..self.fakeRecipeName
-          self.stateMachine:setState(self.stateMachine.states.error)
-          return
+          if self.stateMachine.data.craftFailCount >= 3 then
+            self.stateMachine.data.craftFailCount = 0
+            self.stateMachine.data.errorMessage = "Cant request craft: "..self.fakeRecipeName
+            self.stateMachine:setState(self.stateMachine.states.error)
+            return
+          else
+            self.stateMachine.data.craftFailCount = self.stateMachine.data.craftFailCount + 1
+            os.sleep(1)
+          end
         end
       end
     end
@@ -500,7 +506,7 @@ function heliofusionExoticizerController:new(
         local output = value.cpu.finalOutput()
 
         if output == nil then
-          return false
+          error("Found CPU without crafting monitor")
         end
 
         if output.label == self.fakeRecipeName then
