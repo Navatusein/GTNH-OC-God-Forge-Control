@@ -186,12 +186,13 @@ function heliofusionExoticizerController:new(
 
   ---Init
   function obj:init()
-    self.fakeRecipeName = "Fake recipe "..self.database.address:sub(0, 8)
-
     self.outputMeInterfaceProxy = componentDiscoverLib.discoverProxy(outputMeInterfaceAddress, "Output Me Interface", "me_interface")
     self.inputMeInterfaceProxy = componentDiscoverLib.discoverProxy(inputMeInterfaceAddress, "Input Me Interface", "me_interface")
     self.transposerProxy = componentDiscoverLib.discoverProxy(transposerAddress, "Transposer", "transposer")
     self.redstoneIoProxy = componentDiscoverLib.discoverProxy(redstoneIoAddress, "Redstone io", "redstone")
+
+    self.fakeRecipeName = "Fake recipe "..self.database.address:sub(0, 8)
+    self.database.set(1, "minecraft:paper", 0, "{display:{Name:\""..self.fakeRecipeName.."\"}}")
 
     self.stateMachine.data.outputs = nil
     self.stateMachine.data.craftFailCount = 0
@@ -199,7 +200,7 @@ function heliofusionExoticizerController:new(
     self.stateMachine.data.notifyLongIdle = false
     self.stateMachine.data.notifyLongEndTime = false
 
-    self:fillDatabase(self.magmatterMode and "Magmatter" or "Gluon")
+    self:fillPlasmaList(self.magmatterMode and "Magmatter" or "Gluon")
     self:clearPattern()
 
     while self:tryCancelFakeRecipe() == false do
@@ -338,23 +339,11 @@ function heliofusionExoticizerController:new(
     end
   end
 
-  ---Fill database witch right plasmas
+  ---Fill plasma list with right plasmas
   ---@private
-  function obj:fillDatabase(recipe)
-    self.database.set(1, "minecraft:paper", 0, "{display:{Name:\""..self.fakeRecipeName.."\"}}")
-
-    local databaseIndex = 2
-
+  function obj:fillPlasmaList(recipe)
     for key, value in pairs(plasmaList[recipe]) do
-      local result = self.database.set(databaseIndex, "ae2fc:fluid_drop", 0, "{Fluid:\""..value.."\"}")
-
-      if result == false then
-        error("Cant save "..key.." to database")
-      end
-
-      self.plasmaList[key] = {databaseIndex = databaseIndex, fluid = value}
-
-      databaseIndex = databaseIndex + 1
+      self.plasmaList[key] = value
     end
   end
 
@@ -367,16 +356,22 @@ function heliofusionExoticizerController:new(
       error("No pattern in Interface")
     end
 
+    -- Set paper (with NBT name) at index 1 first so the pattern is never left invalid
+    self.inputMeInterfaceProxy.setInterfacePatternOutput(1, 1, self.database.address, 1, 1)
+    self.inputMeInterfaceProxy.setInterfacePatternInput(1, 1, self.database.address, 1, 1)
+
+    -- Clear any remaining old outputs and inputs beyond index 1
     for key, _ in pairs(pattern.outputs) do
-      self.inputMeInterfaceProxy.clearInterfacePatternOutput(1, key)
+      if key ~= 1 then
+        self.inputMeInterfaceProxy.clearInterfacePatternOutput(1, key)
+      end
     end
 
     for key, _ in pairs(pattern.inputs) do
-      self.inputMeInterfaceProxy.clearInterfacePatternInput(1, key)
+      if key ~= 1 then
+        self.inputMeInterfaceProxy.clearInterfacePatternInput(1, key)
+      end
     end
-
-    self.inputMeInterfaceProxy.setInterfacePatternOutput(1, self.database.address, 1, 1, 1)
-    self.inputMeInterfaceProxy.setInterfacePatternInput(1, self.database.address, 1, 1, 1)
   end
 
   ---Encode fake pattern with the right plasmas
@@ -389,7 +384,7 @@ function heliofusionExoticizerController:new(
     local count = 0
 
     for key, value in pairs(outputs) do
-      if self.magmatterMode == true then 
+      if self.magmatterMode == true then
         if key == "Spatially Enlarged Fluid" or key == "Tachyon Rich Temporal Fluid" then
           count = value.count
         else
@@ -400,7 +395,7 @@ function heliofusionExoticizerController:new(
       end
 
       if self.plasmaList[value.label] ~= nil then
-        self.inputMeInterfaceProxy.setInterfacePatternInput(1, self.database.address, self.plasmaList[value.label].databaseIndex, count, index)
+        self.inputMeInterfaceProxy.setInterfacePatternInput(1, index, {name = self.plasmaList[value.label], amount = count}, "fluid")
       else
         return false, index - 1
       end
