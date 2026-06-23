@@ -15,10 +15,9 @@ local version = require("version")
 local config = configManager.manager:new(configTemplate):build(config)
 
 local repository = "Navatusein/GTNH-OC-God-Forge-Control"
-local branch = "main"
 local archiveName = "GodForgeControl"
 
-local program = programController.program:new(config.enableAutoUpdate, version, repository, branch, archiveName)
+local program = programController.program:new(config.enableAutoUpdate, version, repository, archiveName)
 local gui = simpleGui.gui:new(program)
 
 local logo = {

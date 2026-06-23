@@ -115,7 +115,7 @@ function programUpdater:autoUpdate()
   end
 
   term.clear()
-  term.write("Find new version: "..remoteVersion.programVersion.."\n")
+  term.write("Find new version: "..remoteVersion.programVersion.."\n\n")
 
   if isConfigUpdateNeeded then
     term.write("This update changes the format of the configuration file.\n")
@@ -123,7 +123,7 @@ function programUpdater:autoUpdate()
   end
 
   if isSetupUpdateNeeded then
-    term.write("This update requires changes to the setup, without which the program may not work.\n")
+    term.write("This update requires changes to the setup, without which the program may not work.\n\n")
   end
 
   if isGTNHUpdateNeeded then
@@ -177,15 +177,15 @@ end
 ---@return ProgramVersion|nil
 ---@private
 function programUpdater:getLatestVersionNumber()
-  local versionFileUrl = "https://raw.githubusercontent.com/"..self.program.repository.."/refs/heads/"..self.program.branch.."/version.lua"
+  local versionFileUrl = "https://raw.githubusercontent.com/"..self.program.repository.."/refs/heads/"..self.program.version.branch.."/version.lua"
 
-  local success, requestResult = pcall(internet.request, versionFileUrl)
+  local requestResult = internet.request(versionFileUrl)
+
+  local success, result = pcall(requestResult)
 
   if not success then
     return nil
   end
-
-  local result = ""
 
   for chunk in requestResult do
     result = result..chunk

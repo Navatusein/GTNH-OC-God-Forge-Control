@@ -1,4 +1,5 @@
 local versions = {
+  branch = "develop",
   programVersion = "2.0.0",
   configVersion = 2,
   setupVersion = 1,

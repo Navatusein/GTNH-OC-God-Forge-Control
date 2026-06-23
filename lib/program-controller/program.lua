@@ -24,7 +24,6 @@ end
 ---@field enableAutoUpdate? boolean
 ---@field version? ProgramVersion
 ---@field repository? string
----@field branch? string
 ---@field archiveName? string
 ---@field debug boolean
 ---@field coroutines table
@@ -44,14 +43,12 @@ local program = {}
 ---@param enableAutoUpdate? boolean
 ---@param version? ProgramVersion
 ---@param repository? string
----@param branch? string
 ---@param archiveName? string
 ---@return Program
-function program:constructor(enableAutoUpdate, version, repository, branch, archiveName)
+function program:constructor(enableAutoUpdate, version, repository, archiveName)
   self.enableAutoUpdate = enableAutoUpdate
   self.version = version
   self.repository = repository
-  self.branch = branch
   self.archiveName = archiveName
 
   self.debug = false
