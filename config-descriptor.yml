@@ -79,39 +79,34 @@ descriptor:
   configTemplate: |
     local sides = require("sides")
 
-    local loggerLib = require("lib.logger-lib")
-    local discordLoggerHandler = require("lib.logger-handler.discord-logger-handler-lib")
-    local fileLoggerHandler = require("lib.logger-handler.file-logger-handler-lib")
-    local scrollListLoggerHandler = require("lib.logger-handler.scroll-list-logger-handler-lib")
-
-    local heliofusionExoticizerController = require("src.heliofusion-exoticizer-controller")
-
     local config = {
       enableAutoUpdate = true, -- Enable auto update on start
 
-      logger = loggerLib:newFormConfig({
+      logger = {
         name = "<field>name</field>",
         timeZone = <field>timeZone</field>, -- Your time zone
         handlers = {
-          discordLoggerHandler:newFormConfig({
+          ["discord"] = {
+            type = "discord",
             logLevel = "warning",
             messageFormat = "{Time:%d.%m.%Y %H:%M:%S} [{LogLevel}]: {Message}",
             discordWebhookUrl = "<field>discordWebhookUrl</field>" -- Discord Webhook URL
-          }),
-          fileLoggerHandler:newFormConfig({
+          },
+          ["file"] = {
+            type = "file",
             logLevel = "info",
             messageFormat = "{Time:%d.%m.%Y %H:%M:%S} [{LogLevel}]: {Message}",
             filePath = "logs.log"
-          }),
-          scrollListLoggerHandler:newFormConfig({
+          },
+          ["scrollList"] = {
+            type = "scrollList",
             logLevel = "debug",
             logsListSize = 32
-          }),
+          },
         }
-      }),
+      },
 
-
-      controller = heliofusionExoticizerController:newFormConfig({
+      controller = {
         magmatterMode = <field>magmatterMode</field>, -- Enable mode of production magmatter.
         outputMeInterfaceAddress = "<field>outputMeInterfaceAddress</field>", -- Address of me interface which connected to output AE.
         inputMeInterfaceAddress = "<field>inputMeInterfaceAddress</field>", -- Address of me interface which connected to input AE.
@@ -120,7 +115,7 @@ descriptor:
         meDriveSide = <field>meDriveSide</field>, -- Side of the transposer which connected to output AE ME Drive.
         redstoneIoAddress = "<field>redstoneIoAddress</field>", -- Redstone IO Address.
         redstoneIoSide = <field>redstoneIoSide</field> -- Side of the redstone IO which connected to ME Level Emitter or other controller.
-      })
+      }
     }
 
     return config

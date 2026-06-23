@@ -1,5 +1,10 @@
 # GTNH-OC-God-Forge-Control
 
+> [!CAUTION]
+> The program has been updated to GTNH version 2.9+ and is not backward compatible with version 2.8. 
+> If you are playing on version 2.8, do not update the program to the latest version. 
+> If you are just about to install the program, select the version for 2.8 in the installer. 
+
 ## Content
 
 - [Information](#information)
