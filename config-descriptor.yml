@@ -3,6 +3,18 @@ descriptor:
   description: Program for automating the production of Degenerate Quark Gluon Plasma and Molten Magmatter
   repositoryLink: https://github.com/Navatusein/GTNH-OC-God-Forge-Control
   fieldGroups:
+    - key: general
+      name: General
+      defaultOpen: true
+      fields:
+        - key: autoUpdate
+          type: boolean
+          optional: true
+          default: true
+          class: checkbox
+          label: Enable Auto Update
+          description: Enable program automatic update
+
     - key: logger
       name: Logger
       defaultOpen: true
@@ -80,7 +92,7 @@ descriptor:
     local sides = require("sides")
 
     local config = {
-      enableAutoUpdate = true, -- Enable auto update on start
+      enableAutoUpdate = <field>autoUpdate</field>, -- Enable auto update on start
 
       logger = {
         name = "<field>name</field>",
