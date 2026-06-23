@@ -3,7 +3,7 @@ name: Release Develop
 on:
   push:
     tags:
-      - "dev-v*.*.*"
+      - "v*.*.*-dev.*"
 
 permissions:
   contents: write
