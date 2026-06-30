@@ -3,7 +3,7 @@
 > [!CAUTION]
 > The program has been updated to GTNH version 2.9+ and is not backward compatible with version 2.8. 
 > If you are playing on version 2.8, do not update the program to the latest version. 
-> If you are just about to install the program, select the version for 2.8 in the installer. 
+> If you are just about to install the program, select the version for 2.8 in the installer.
 
 ## Content
 
@@ -70,7 +70,7 @@ main
 
 > [!NOTE]  
 > For convenient configuration you can use the web configurator.
-> [GTNH-OC-Web-Configurator](https://navatusein.github.io/GTNH-OC-Web-Configurator/#/configurator?url=https%3A%2F%2Fraw.githubusercontent.com%2FNavatusein%2FGTNH-OC-God-Forge-Control%2Fmain%2Fconfig-descriptor.yml)
+> [GTNH-OC-Web-Configurator](https://navatusein.github.io/GTNH-OC-Web-Configurator/#/configurator?url=https%3A%2F%2Fraw.githubusercontent.com%2FNavatusein%2FGTNH-OC-God-Forge-Control%2Frefs%2Fheads%2Fdevelop%2Fconfig-descriptor.yml)
 
 <a id="setup"></a>
 
@@ -133,7 +133,8 @@ It must have a number of CPUs greater than the number of setups connected to it.
 also important that it has a “Fluid Discretizer” and all CPUs have a “Crafting Monitor”.
 
 > [!CAUTION]
-> In cases where the input subnet is your main network, the entire CPU must be equipped with a “Crafting Monitor”.
+> To work, all CPUs must be equipped with a “Crafting Monitor“
+> In cases where the input subnet is your main network, all CPUs must be equipped with a “Crafting Monitor“.
 
 If, on the other hand, you want to separate the entry network from the main network. 
 Then you need to show all 80+ plasmas in the input subnet and make the output of unnecessary 
@@ -149,7 +150,7 @@ Temporal Fluid” storage in it.
 
 > [!NOTE]  
 > For convenient configuration you can use the web configurator.
-> [GTNH-OC-Web-Configurator](https://navatusein.github.io/GTNH-OC-Web-Configurator/#/configurator?url=https%3A%2F%2Fraw.githubusercontent.com%2FNavatusein%2FGTNH-OC-God-Forge-Control%2Fmain%2Fconfig-descriptor.yml)
+> [GTNH-OC-Web-Configurator](https://navatusein.github.io/GTNH-OC-Web-Configurator/#/configurator?url=https%3A%2F%2Fraw.githubusercontent.com%2FNavatusein%2FGTNH-OC-God-Forge-Control%2Frefs%2Fheads%2Fdevelop%2Fconfig-descriptor.yml)
 
 General configuration in file `config.lua`
 
@@ -165,26 +166,29 @@ In the `discordWebhookUrl` field, you can specify the Discord Webhook link so th
 [How to Create a Discord Webhook?](https://www.svix.com/resources/guides/how-to-make-webhook-discord/)
 
 ```lua
-logger = loggerLib:newFormConfig({
+logger = {
   name = "God Forge Control",
   timeZone = 3, -- Your time zone
   handlers = {
-    discordLoggerHandler:newFormConfig({
+    ["discord"] = {
+      type = "discord",
       logLevel = "warning",
       messageFormat = "{Time:%d.%m.%Y %H:%M:%S} [{LogLevel}]: {Message}",
       discordWebhookUrl = "" -- Discord Webhook URL
-    }),
-    fileLoggerHandler:newFormConfig({
+    },
+    ["file"] = {
+      type = "file",
       logLevel = "info",
       messageFormat = "{Time:%d.%m.%Y %H:%M:%S} [{LogLevel}]: {Message}",
       filePath = "logs.log"
-    }),
-    scrollListLoggerHandler:newFormConfig({
+    },
+    ["scrollList"] = {
+      type = "scrollList",
       logLevel = "debug",
       logsListSize = 32
-    }),
+    },
   }
-}),
+},
 ```
 
 In the `magmatterMode` field you specify program mode. If it `true` program will in be in the magmatter craft mode. 
@@ -205,7 +209,7 @@ In the `redstoneIoAddress` field you specify address of the Redstone IO to switc
 In the `redstoneIoSide` field you specify side of the redstone IO which connected to ME Level Emitter or other controller.
 
 ```lua
-controller = heliofusionExoticizerController:newFormConfig({
+controller = {
   magmatterMode = false, -- Enable mode of production magmatter.
   outputMeInterfaceAddress = "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa", -- Address of me interface which connected to output AE.
   inputMeInterfaceAddress = "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa", -- Address of me interface which connected to input AE.
@@ -214,5 +218,5 @@ controller = heliofusionExoticizerController:newFormConfig({
   meDriveSide = sides.west, -- Side of the transposer which connected to output AE ME Drive.
   redstoneIoAddress = "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa", -- Redstone IO Address.
   redstoneIoSide = sides.east -- Side of the redstone IO which connected to ME Level Emitter or other controller.
-})
+}
 ```
