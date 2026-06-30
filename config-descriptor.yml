@@ -1,7 +1,7 @@
 descriptor:
-  name: God Forge Control
+  name: God Forge Control for 2.9+
   description: Program for automating the production of Degenerate Quark Gluon Plasma and Molten Magmatter
-  repositoryLink: https://github.com/Navatusein/GTNH-OC-God-Forge-Control
+  repositoryLink: https://github.com/Navatusein/GTNH-OC-God-Forge-Control/tree/develop
   fieldGroups:
     - key: general
       name: General
