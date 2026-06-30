@@ -11,6 +11,16 @@ local stateMachineBuilder = require("lib.state-machine-builder.index")
 ---@field count number
 ---@field isLiquid boolean
 
+---@class HeliofusionExoticizerData
+---@field time number
+---@field notifyLongIdle boolean
+---@field notifyLongEndTime boolean
+---@field waitEndTime number
+---@field craftFailCount integer
+---@field errorResetDelay integer
+---@field outputs? table<string, OutputItem>
+---@field errorMessage? string
+
 ---@type table<"Gluon"|"Magmatter", table<string, string>>
 local plasmaList = {
   ["Gluon"] = {
@@ -117,7 +127,7 @@ local plasmaList = {
 }
 
 ---@class HeliofusionExoticizerController
----@field stateMachine StateMachine
+---@field stateMachine StateMachine<HeliofusionExoticizerData>
 ---@field magmatterMode boolean
 ---@field meIoPortSide number
 ---@field meDriveSide number
@@ -177,7 +187,7 @@ function heliofusionExoticizerController:init()
   self:initComponents()
   term.write("ok\n")
 
-  term.write("Init stateMachine: ")
+  term.write("Init state machine: ")
   self:initStateMachine()
   term.write("ok\n")
 
@@ -224,10 +234,10 @@ end
 function heliofusionExoticizerController:initStateMachine()
   self.stateMachine:createState("idle", "Idle", {
     onInit = function ()
-      self.stateMachine.data["time"] = computer.uptime()
-      self.stateMachine.data["notifyLongIdle"] = false
+      self.stateMachine.data.time = computer.uptime()
+      self.stateMachine.data.notifyLongIdle = false
 
-      if self.stateMachine.data["notifyLongEndTime"] == true then
+      if self.stateMachine.data.notifyLongEndTime == true then
         event.push("log_warning", "Successfully went to Idle state after a long Wait End state")
       end
     end,
@@ -236,13 +246,13 @@ function heliofusionExoticizerController:initStateMachine()
 
       if signal ~= 0 then
         local items, itemsCount = self:getOutputs()
-        local diff = math.ceil(computer.uptime() - self.stateMachine.data["time"])
+        local diff = math.ceil(computer.uptime() - self.stateMachine.data.time)
 
         if itemsCount >= (self.magmatterMode == true and 3 or 7) then
-          self.stateMachine.data["outputs"] = items
+          self.stateMachine.data.outputs = items
           self.stateMachine:setState("encodeFakePattern")
-        elseif diff > 240 and self.stateMachine.data["notifyLongIdle"] == false then
-          self.stateMachine.data["notifyLongIdle"] = true
+        elseif diff > 240 and self.stateMachine.data.notifyLongIdle == false then
+          self.stateMachine.data.notifyLongIdle = true
           event.push("log_warning", "More than four minutes in the idle state: "..diff)
         end
       end
@@ -251,14 +261,15 @@ function heliofusionExoticizerController:initStateMachine()
 
   self.stateMachine:createState("encodeFakePattern", "Encode Fake Pattern", {
     onInit = function ()
-      if self.stateMachine.data["notifyLongIdle"] == true then
+      if self.stateMachine.data.notifyLongIdle == true then
         event.push("log_warning", "Successfully went to Encode Fake Pattern state after a long Idle state")
       end
 
-      local success, outputsCount = self:encodePattern(self.stateMachine.data["outputs"])
+      local success, outputsCount = self:encodePattern(self.stateMachine.data.outputs)
 
       if success == false then
-        self.stateMachine.data["errorMessage"] = "Found an unidentified object in the output subnet"
+        self.stateMachine.data.errorMessage = "Found an unidentified object in the output subnet"
+        self.stateMachine.data.errorResetDelay = 0
         self.stateMachine:setState("error")
         return
       end
@@ -266,7 +277,8 @@ function heliofusionExoticizerController:initStateMachine()
       local expectedCount = self.magmatterMode == true and 3 or 7
 
       if outputsCount ~= expectedCount then
-        self.stateMachine.data["errorMessage"] = "Number of objects ("..outputsCount..") doesn't match the expected ("..expectedCount..")"
+        self.stateMachine.data.errorMessage = "Number of objects ("..outputsCount..") doesn't match the expected ("..expectedCount..")"
+        self.stateMachine.data.errorResetDelay = 0
         self.stateMachine:setState("error")
         return
       end
@@ -275,7 +287,7 @@ function heliofusionExoticizerController:initStateMachine()
     end,
   })
 
-  self.stateMachine:createState("clearOutputAe", "Clear Output AE", {
+    self.stateMachine:createState("clearOutputAe", "Clear Output AE", {
     onInit = function ()
       self:clearAe()
       self.stateMachine:setState("requestFakePattern")
@@ -284,21 +296,22 @@ function heliofusionExoticizerController:initStateMachine()
 
   self.stateMachine:createState("requestFakePattern", "Request Fake Pattern", {
     onInit = function ()
-      self.stateMachine.data["craftFailCount"] = 0
+      self.stateMachine.data.craftFailCount = 0
     end,
     onUpdate = function ()
       if self:getFreeCpusCount() >= 1 then
         if self:requestFakeRecipe() == true or self:hasFakeRecipe() == true then
-          self.stateMachine.data["craftFailCount"] = 0
+          self.stateMachine.data.craftFailCount = 0
           self.stateMachine:setState("waitEnd")
         else
-          if self.stateMachine.data["craftFailCount"] >= 3 then
-            self.stateMachine.data["craftFailCount"] = 0
-            self.stateMachine.data["errorMessage"] = "Cant request craft: "..self.fakeRecipeName
+          if self.stateMachine.data.craftFailCount >= 3 then
+            self.stateMachine.data.craftFailCount = 0
+            self.stateMachine.data.errorMessage = "Cant request craft: "..self.fakeRecipeName
+            self.stateMachine.data.errorResetDelay = 60
             self.stateMachine:setState("error")
             return
           else
-            self.stateMachine.data["craftFailCount"] = self.stateMachine.data["craftFailCount"] + 1
+            self.stateMachine.data.craftFailCount = self.stateMachine.data.craftFailCount + 1
             os.sleep(1)
           end
         end
@@ -310,23 +323,23 @@ function heliofusionExoticizerController:initStateMachine()
 
   self.stateMachine:createState("waitEnd", "Wait End", {
     onInit = function ()
-      self.stateMachine.data["waitEndTime"] = computer.uptime()
-      self.stateMachine.data["notifyLongEndTime"] = false
+      self.stateMachine.data.waitEndTime = computer.uptime()
+      self.stateMachine.data.notifyLongEndTime = false
     end,
     onUpdate = function ()
       local _, itemsCount = self:getOutputs()
 
-      local diff = math.ceil(computer.uptime() - self.stateMachine.data["waitEndTime"])
+      local diff = math.ceil(computer.uptime() - self.stateMachine.data.waitEndTime)
 
-      if itemsCount ~= 0 then 
+      if itemsCount ~= 0 then
         while self:tryCancelFakeRecipe() == false do
           os.sleep(0.1)
         end
 
-        self.stateMachine.data["outputs"] = nil
+        self.stateMachine.data.outputs = nil
         self.stateMachine:setState("idle")
-      elseif diff > 240 and self.stateMachine.data["notifyLongEndTime"] == false then
-        self.stateMachine.data["notifyLongEndTime"] = true
+      elseif diff > 240 and self.stateMachine.data.notifyLongEndTime == false then
+        self.stateMachine.data.notifyLongEndTime = true
         event.push("log_warning", "More than four minutes in the wait end state: "..diff)
       end
     end
@@ -338,10 +351,10 @@ function heliofusionExoticizerController:initStateMachine()
         os.sleep(1)
       end
 
-      event.push("log_error", self.stateMachine.data["errorMessage"])
+      event.push("log_error", self.stateMachine.data.errorMessage)
       event.push("log_info","&red;Press Enter to confirm")
 
-      self.stateMachine.data["errorMessage"] = nil
+      self.stateMachine.data.errorMessage = nil
     end,
   })
 
@@ -367,16 +380,20 @@ function heliofusionExoticizerController:clearPattern()
     error("No pattern in Interface")
   end
 
+  self.inputMeInterfaceProxy.setInterfacePatternOutput(1, 1, self.databaseProxy.address, 1, 1)
+  self.inputMeInterfaceProxy.setInterfacePatternInput(1, 1, self.databaseProxy.address, 1, 1)
+
   for key, _ in pairs(pattern.outputs) do
-    self.inputMeInterfaceProxy.clearInterfacePatternOutput(1, key)
+    if key ~= 1 then
+      self.inputMeInterfaceProxy.clearInterfacePatternOutput(1, key)
+    end
   end
 
   for key, _ in pairs(pattern.inputs) do
-    self.inputMeInterfaceProxy.clearInterfacePatternInput(1, key)
+    if key ~= 1 then
+      self.inputMeInterfaceProxy.clearInterfacePatternInput(1, key)
+    end
   end
-
-  self.inputMeInterfaceProxy.setInterfacePatternOutput(1, 1, self.databaseProxy.address, 1, 1)
-  self.inputMeInterfaceProxy.setInterfacePatternInput(1, 1, self.databaseProxy.address, 1, 1)
 end
 
 ---Encode fake pattern with the right plasmas

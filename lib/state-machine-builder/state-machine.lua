@@ -2,9 +2,9 @@ local classBuilder = require("lib.class-builder.index")
 
 local stateDefinition = require("lib.state-machine-builder.state-definition")
 
----@class StateMachine
+---@class StateMachine<T>
 ---@field states table<string, StateDefinition>
----@field data table<string, any>
+---@field data T
 ---@field currentState? StateDefinition
 local stateMachine = {}
 
@@ -79,6 +79,22 @@ end
 ---@return string
 function stateMachine:getCurrentStateName()
   return self.currentState.name or self.currentState.name and "nil"
+end
+
+---Set state machine data
+---@param key string
+---@param value any
+function stateMachine:setData(key, value)
+  self.data[key] = value
+end
+
+---Get state machine data
+---@param key string
+---@return any
+function stateMachine:getData(key)
+  assert(self.data[key] ~= nil, "Undefined state data key ["..key.."]")
+
+  return self.data[key]
 end
 
 ---Loop

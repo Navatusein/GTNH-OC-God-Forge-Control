@@ -123,7 +123,7 @@ function programUpdater:autoUpdate()
   end
 
   if isSetupUpdateNeeded then
-    term.write("This update requires changes to the setup, without which the program may not work.\n\n")
+    term.write("This update requires changes in the multiblock setup, without which program may not work.\n\n")
   end
 
   if isGTNHUpdateNeeded then
@@ -142,7 +142,7 @@ function programUpdater:autoUpdate()
 
   self:tryDownloadTarUtility()
 
-  local url = "https://github.com/"..self.program.repository.."/releases/download/"..remoteVersion.."/"..self.program.archiveName..".tar"
+  local url = "https://github.com/"..self.program.repository.."/releases/download/v"..remoteVersion.programVersion.."/"..self.program.archiveName..".tar"
 
   term.clear()
   term.write("Updating to version: "..remoteVersion.programVersion.."\n")
@@ -180,6 +180,10 @@ function programUpdater:getLatestVersionNumber()
   local versionFileUrl = "https://raw.githubusercontent.com/"..self.program.repository.."/refs/heads/"..self.program.version.branch.."/version.lua"
 
   local requestResult = internet.request(versionFileUrl)
+
+  if not requestResult then
+    return nil
+  end
 
   local success, result = pcall(requestResult)
 

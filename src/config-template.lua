@@ -56,9 +56,8 @@ local configTemplate = {
                   logLevel = configManager.validators.enum:new({
                     "debug", "info", "warning", "error"
                   }),
-                  messageFormat = configManager.validators.string:new(),
                   logsListSize = configManager.validators.number:new({
-                    min = {value = 5}
+                    min = {value = 16}
                   }),
                 },
                 objectFactory = function (value)
