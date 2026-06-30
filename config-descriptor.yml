@@ -4,16 +4,16 @@ descriptor:
   repositoryLink: https://github.com/Navatusein/GTNH-OC-God-Forge-Control
   fieldGroups:
     - key: general
-        name: General
-        defaultOpen: true
-        fields:
-          - key: autoUpdate
-            type: boolean
-            optional: true
-            default: true
-            class: checkbox
-            label: Enable Auto Update
-            description: Enable program automatic update
+      name: General
+      defaultOpen: true
+      fields:
+        - key: autoUpdate
+          type: boolean
+          optional: true
+          default: true
+          class: checkbox
+          label: Enable Auto Update
+          description: Enable program automatic update
             
     - key: logger
       name: Logger
