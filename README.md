@@ -1,9 +1,11 @@
 # GTNH-OC-God-Forge-Control
 
 > [!CAUTION]
-> The program has been updated to GTNH version 2.9+ and is not backward compatible with version 2.8. 
-> If you are playing on version 2.8, do not update the program to the latest version. 
-> If you are just about to install the program, select the version for 2.8 in the installer.
+> This version of the program is in beta testing.
+> It uses a new configuration format that is **not compatible** with the config of the first version,
+> so the old `config.lua` will not work and the configuration must be created from scratch.
+> The auto update will also **not** update you to this version.
+> To install it, run the installer and select the required version manually.
 
 ## Content
 
