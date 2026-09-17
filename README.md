@@ -2,11 +2,12 @@
 
 > [!CAUTION]
 > This version of the program is in beta testing.
+> It requires GTNH **2.9** or newer and will **not** work on 2.8 and older versions.
 > It uses a new configuration format that is **not compatible** with the config of the first version,
 > so the old `config.lua` will not work and the configuration must be created from scratch.
 > The auto update will also **not** update you to this version.
 > To install it, run the installer and select the required version manually.
-
+> 
 ## Content
 
 - [Information](#information)
